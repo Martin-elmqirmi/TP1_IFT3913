@@ -2,6 +2,8 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 public class ClassMetrics {
 
@@ -167,7 +169,73 @@ public class ClassMetrics {
         }
 
         return answer;
-    }  
+    }
+
+
+    /**
+     * Fonction qui prend un BufferedReader d'une classe java en entre et retourne la somme pondérée
+     * des complexités cyclomatiques de McCabe de toutes les méthodes d'une classe
+     * @param texte
+     * @return
+     */
+    static int get_mccabe_complexity_class(BufferedReader texte) {
+        int mccabe_complexity = 0;
+        int number_of_methods = 0;
+        String line = null;
+
+        boolean commented = false;
+        String simple_comment = "//.*";
+        String complex_comment_start = "/[*]{1,}.*";
+        String complex_comment_end = "[*]/";
+        String condition = "while\\(.*\\)|if\\(.*\\)|for\\(.*\\)" +
+                "|\\bwhile\\b|\\bif\\b|\\bfor\\b|\\b[{]?else[}]?\\b|\\bcase\\b|\\bdefault\\b";
+        String boolean_condition = "&&|[|]{2}";
+        String method = ".+\\s.+\\(.*\\)";
+        Pattern simple_pattern = Pattern.compile(simple_comment, Pattern.CASE_INSENSITIVE);
+        Pattern complex_pattern_start = Pattern.compile(complex_comment_start, Pattern.CASE_INSENSITIVE);
+        Pattern complex_pattern_end = Pattern.compile(complex_comment_end, Pattern.CASE_INSENSITIVE);
+        Pattern condition_pattern = Pattern.compile(condition);
+        Pattern boolean_condition_pattern = Pattern.compile(boolean_condition);
+        Pattern method_pattern = Pattern.compile(method);
+
+        try {
+            while((line=texte.readLine()) != null){
+                String[] table_string;
+                table_string = line.split(" ");
+                for(int i = 0; i < table_string.length; i++) {
+                    if(commented && complex_pattern_end.matcher(table_string[i]).find()) {
+                        /* Si nous somme dans un commentaire de type /** ou /*,
+                        * et qu'on trouve un * /, nous sortons de l'état commented
+                        * et donc on peut de nouveau compter la compléxité de McCabe */
+                        commented = false;
+                    }
+                    if(!commented) {
+                        /* Si nous ne somme pas dans un commentaire et qu'on trouve un //,
+                        * nous pouvons directement passer à la prochaine ligne */
+                        if(simple_pattern.matcher(table_string[i]).find()) {
+                            break;
+                        } else if(complex_pattern_start.matcher(table_string[i]).find()) {
+                            // Si on tombe sur un commentaire de type /* ou /**, on passe dans l'état commented
+                            commented = true;
+                        } else if(condition_pattern.matcher(table_string[i]).find()) {
+                            // On calcul le nombre de prédicats (exemple : while, if, etc)
+                            System.out.println(table_string[i]);
+                        } else if(method_pattern.matcher(table_string[i]).find()) {
+                            // On calcul le nombre de méthodes dans la classe java
+                            System.out.println(table_string[i]);
+                        } else if(boolean_condition_pattern.matcher(table_string[i]).find()) {
+                            // On calcul le nombre de conditions booléen ajouter dans un if par exemple
+                            System.out.println(table_string[i]);
+                        }
+                    }
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return mccabe_complexity;
+    }
 }
 
 

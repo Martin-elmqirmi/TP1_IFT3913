@@ -1,4 +1,6 @@
 import java.io.*;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 
 public class Main {
@@ -64,6 +66,8 @@ public class Main {
      * @throws IOException
      */
     public static void main(String[] args){
-        Metrics.parcoursRepertoire("/Users/davejoseph/Desktop/TestIFT3913");
+        BufferedReader file = ClassMetrics.readFiles("/Users/martinelmqirmi/Documents/TP1_IFT3913/TestIFT3913/cour0_3275.java");
+        ClassMetrics.get_mccabe_complexity_class(file);
+        //Metrics.parcoursRepertoire("/Users/davejoseph/Desktop/TestIFT3913");
     }
 }
