@@ -62,10 +62,10 @@ public class Metrics {
      // https://stackoverflow.com/questions/11373130/how-to-get-foldername-and-filename-from-the-directorypath
     static void metrics(String folder){
 
-        int locPaquet , clocPaquet;
-        locPaquet = clocPaquet = 0;
-        double dcPaquet; 
-        dcPaquet = 0; 
+        int locPaquet , clocPaquet, wcp;
+        locPaquet = clocPaquet = wcp = 0;
+        double dcPaquet, bcPaquet;
+        dcPaquet = bcPaquet = 0;
 
         File myFolder = new File(folder);
         File[] listOfFiles = myFolder.listFiles(); // list de fichiers dans mon dossier
@@ -89,6 +89,7 @@ public class Metrics {
 
                 BufferedReader texte1 =  ClassMetrics.readFiles(path);
                 BufferedReader texte2 =  ClassMetrics.readFiles(path);
+                BufferedReader texte3 =  ClassMetrics.readFiles(path);
 
                 // Solution non efficace: creer 2 bufferedReader (a voir comment ameliorer)
 
@@ -99,21 +100,26 @@ public class Metrics {
 
                 int loc = ClassMetrics.get_classe_LOC(texte1);
                 int cloc = ClassMetrics.get_classe_CLOC(texte2);
+                int wmc = ClassMetrics.get_WMC(texte3);
                 double dc = ClassMetrics.get_classe_DC(cloc,loc);
+                double bc = ClassMetrics.get_classe_BC(dc, wmc);
 
-                locPaquet += loc; clocPaquet += cloc; 
+                locPaquet += loc;
+                clocPaquet += cloc;
+                wcp += wmc;
                 // infos entrees de la facon qu'il vont etre mis dans le fichier csv
                 classInfos.add(new String[]
-                {path,name,loc+"",cloc+"",dc+""});
+                {path,name,loc+"",cloc+"",dc+"",wmc+"",bc+""});
             }
         }
         // si pas de fichier dans le dossier on a pas besoin de calculer ca
         if(listOfFiles.length != 0){
             dcPaquet = (double) clocPaquet/ (double) locPaquet;
+            bcPaquet = ClassMetrics.get_paquet_BC(dcPaquet, wcp);
             String name = myFolder.getName();
 
             packageInfos.add(new String[]
-            {folder,name,locPaquet+"",clocPaquet+"",dcPaquet+""});
+            {folder,name,locPaquet+"",clocPaquet+"",dcPaquet+"", wcp+"", bcPaquet+""});
         }
     }
 
@@ -123,8 +129,8 @@ public class Metrics {
         File csvFile = new File("classes.csv");
         try {
             PrintWriter out = new PrintWriter(csvFile);
-            out.printf("%s, %s, %s, %s, %s\n",
-            "chemin","class","class_LOC","classe_CLOC","classe_DC");
+            out.printf("%s, %s, %s, %s, %s, %s, %s\n",
+            "chemin","class","class_LOC","classe_CLOC","classe_DC","WMC", "classe_BC");
 
             for(int i = 0; i < classInfos.size(); i++){
                 for(int j = 0; j < classInfos.get(i).length; j++){
@@ -144,8 +150,8 @@ public class Metrics {
         File csvFile = new File("paquets.csv");
         try {
             PrintWriter out = new PrintWriter(csvFile);
-            out.printf("%s, %s, %s, %s, %s\n",
-            "chemin","paquet","paquet_LOC","paquet_CLOC","paquet_DC");
+            out.printf("%s, %s, %s, %s, %s, %s, %s\n",
+            "chemin","paquet","paquet_LOC","paquet_CLOC","paquet_DC","WCP","paquet_BC");
 
             for(int i = 0; i < packageInfos.size(); i++){
                 for(int j = 0; j < packageInfos.get(i).length; j++){

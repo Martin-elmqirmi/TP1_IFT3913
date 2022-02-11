@@ -173,68 +173,130 @@ public class ClassMetrics {
 
 
     /**
+     * Fonction qui prend en paramètre la densité de commentaires
+     * et la somme des complexités cyclomatique de McCabe d'une classe java
+     * et retourne le degré selon lequel cette classe est bien commentée
+     * @param classe_DC
+     * @param WMC
+     * @return
+     */
+    public static double get_classe_BC(double classe_DC, int WMC) {
+        return classe_DC / (double) WMC;
+    }
+
+
+    /**
+     * Fonction qui prend en paramètre la densité de commentaires
+     * et la somme des complexités cyclomatique de McCabe d'un paquet java
+     * et retourne le degré selon lequel ce paquet est bien commenté
+     * @param paquet_DC
+     * @param WCP
+     * @return
+     */
+    public static double get_paquet_BC(double paquet_DC, int WCP) {
+        return paquet_DC / (double) WCP;
+    }
+
+
+    /**
+     * Fonction qui prend une ligne de code et qui retourne cette même ligne
+     * sans les commentaires
+     * @param line
+     * @return
+     */
+    static String[] reform_line(String[] line) {
+        String[] new_line = {"", ""};
+        String[] line_words = line[0].split("\\s");
+
+        // Patterns of comments
+        String simple_comment = "//.*";
+        String complex_comment_start = "/\\*|/\\*\\*";
+        String complex_comment_end = "[*]/";
+        Pattern simple_pattern = Pattern.compile(simple_comment, Pattern.CASE_INSENSITIVE);
+        Pattern complex_pattern_start = Pattern.compile(complex_comment_start, Pattern.CASE_INSENSITIVE);
+        Pattern complex_pattern_end = Pattern.compile(complex_comment_end, Pattern.CASE_INSENSITIVE);
+
+        boolean simple_commented = false;
+        boolean complex_commented = Boolean.parseBoolean(line[1]);
+        for (String line_word : line_words) {
+            if (!simple_commented) {
+                // Si on tombe sur un commentaire // la ligne est terminé
+                if (simple_pattern.matcher(line_word).find()) {
+                    simple_commented = true;
+                } else if (complex_pattern_start.matcher(line_word).find()) {
+                    complex_commented = true;
+                } else {
+                    if (!complex_commented) {
+                        new_line[0] += line_word + " ";
+                    } else if (complex_pattern_end.matcher(line_word).find()) {
+                        String[] split_comment = line_word.split("\\*/");
+                        if (split_comment.length > 1) {
+                            new_line[0] += split_comment[1] + " ";
+                        }
+                        complex_commented = false;
+                    }
+                }
+            }
+        }
+        new_line[1] = Boolean.toString(complex_commented);
+
+        return new_line;
+    }
+
+    /**
      * Fonction qui prend un BufferedReader d'une classe java en entre et retourne la somme pondérée
      * des complexités cyclomatiques de McCabe de toutes les méthodes d'une classe
      * @param texte
      * @return
      */
-    static int get_mccabe_complexity_class(BufferedReader texte) {
+    static int get_WMC(BufferedReader texte) {
         int mccabe_complexity = 0;
         int number_of_methods = 0;
         String line = null;
+        String[] no_comment_line;
 
-        boolean commented = false;
-        String simple_comment = "//.*";
-        String complex_comment_start = "/[*]{1,}.*";
-        String complex_comment_end = "[*]/";
+        boolean complex_commented = false;
+
+        // Création des patterns pour récupérer le nombre de prédicats et de méthodes
         String condition = "while\\(.*\\)|if\\(.*\\)|for\\(.*\\)" +
                 "|\\bwhile\\b|\\bif\\b|\\bfor\\b|\\b[{]?else[}]?\\b|\\bcase\\b|\\bdefault\\b";
-        String boolean_condition = "&&|[|]{2}";
-        String method = ".+\\s.+\\(.*\\)";
-        Pattern simple_pattern = Pattern.compile(simple_comment, Pattern.CASE_INSENSITIVE);
-        Pattern complex_pattern_start = Pattern.compile(complex_comment_start, Pattern.CASE_INSENSITIVE);
-        Pattern complex_pattern_end = Pattern.compile(complex_comment_end, Pattern.CASE_INSENSITIVE);
+        String boolean_condition = "&&|[|]{2}|\\?|and";
+        String method = ".+\\s.+\\(\\w+\\s\\w+\\)";
         Pattern condition_pattern = Pattern.compile(condition);
         Pattern boolean_condition_pattern = Pattern.compile(boolean_condition);
         Pattern method_pattern = Pattern.compile(method);
 
+        String[] new_line = {"", "false"};
         try {
             while((line=texte.readLine()) != null){
-                String[] table_string;
-                table_string = line.split(" ");
-                for(int i = 0; i < table_string.length; i++) {
-                    if(commented && complex_pattern_end.matcher(table_string[i]).find()) {
-                        /* Si nous somme dans un commentaire de type /** ou /*,
-                        * et qu'on trouve un * /, nous sortons de l'état commented
-                        * et donc on peut de nouveau compter la compléxité de McCabe */
-                        commented = false;
-                    }
-                    if(!commented) {
-                        /* Si nous ne somme pas dans un commentaire et qu'on trouve un //,
-                        * nous pouvons directement passer à la prochaine ligne */
-                        if(simple_pattern.matcher(table_string[i]).find()) {
-                            break;
-                        } else if(complex_pattern_start.matcher(table_string[i]).find()) {
-                            // Si on tombe sur un commentaire de type /* ou /**, on passe dans l'état commented
-                            commented = true;
-                        } else if(condition_pattern.matcher(table_string[i]).find()) {
-                            // On calcul le nombre de prédicats (exemple : while, if, etc)
-                            System.out.println(table_string[i]);
-                        } else if(method_pattern.matcher(table_string[i]).find()) {
-                            // On calcul le nombre de méthodes dans la classe java
-                            System.out.println(table_string[i]);
-                        } else if(boolean_condition_pattern.matcher(table_string[i]).find()) {
-                            // On calcul le nombre de conditions booléen ajouter dans un if par exemple
-                            System.out.println(table_string[i]);
+                new_line[0] = line;
+                new_line[1] = Boolean.toString(complex_commented);
+                no_comment_line = reform_line(new_line);
+                complex_commented = Boolean.parseBoolean(no_comment_line[1]);
+                if(condition_pattern.matcher(no_comment_line[0]).find()) {
+                    mccabe_complexity += 1;
+                }
+                if(boolean_condition_pattern.matcher(no_comment_line[0]).find()) {
+                    String[] split_line =  no_comment_line[0].split("\\s");
+                    for (String s : split_line) {
+                        if (boolean_condition_pattern.matcher(s).find()) {
+                            mccabe_complexity += 1;
                         }
                     }
+                }
+                if(method_pattern.matcher(no_comment_line[0]).find()) {
+                    mccabe_complexity += 1;
+                    number_of_methods += 1;
                 }
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        return mccabe_complexity;
+        if(number_of_methods == 0) {
+            return 1;
+        }
+        return mccabe_complexity / number_of_methods;
     }
 }
 
