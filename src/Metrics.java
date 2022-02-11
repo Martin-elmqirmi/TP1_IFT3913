@@ -26,28 +26,25 @@ public class Metrics {
     /**
      * Fonction recuperant tous les dossiers d'un chemin donne.
      * Le chemin de chaque dossier est ensuite stocke dans un
-     * arrayList
+     * arrayList "repositories"
      * @param chemin
      * @return 
      */
-
     static void parcoursRepertoire(String chemin){
 
         Path path = Paths.get(chemin);
         try(Stream<Path> subPaths = Files.walk(path) ){
-            // Je recupere tous les dossiers de mon repertoire
+            // Je recupere tous les DOSSIERS de mon repertoire
             subPaths.filter(Files::isDirectory).forEach(a -> repositories.add(a.toString()));
         } catch (IOException e){
            e.printStackTrace();
         }
 
        for(int i=0; i<repositories.size(); i++){
-           System.out.println("-------------------------------------");
-           System.out.println("Le dossier est: "+ repositories.get(i));
            metrics(repositories.get(i));
        }
-       classeCsv();
-       paquetCsv();
+       CsvClassWriter.toCsv("classes", classInfos);
+       CsvPackageWriter.toCsv("paquets", packageInfos);
     }
 
 
