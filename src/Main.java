@@ -13,6 +13,6 @@ public class Main {
      * @throws IOException
      */
     public static void main(String[] args) {
-        Metrics.parcoursRepertoire("/Users/martinelmqirmi/Documents/TP1_IFT3913/TestIFT3913");
+        Metrics.parcoursRepertoire("/Users/davejoseph/Desktop/jfreechart-master");
     }
 }
