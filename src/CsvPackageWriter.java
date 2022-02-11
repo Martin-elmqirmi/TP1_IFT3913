@@ -17,8 +17,8 @@ public class CsvPackageWriter {
         File csvFile = new File(file);
         try {
             PrintWriter out = new PrintWriter(csvFile);
-            out.printf("%s, %s, %s, %s, %s\n",
-            "chemin","paquet","paquet_LOC","paquet_CLOC","paquet_DC");
+            out.printf("%s, %s, %s, %s, %s, %s, %s\n",
+            "chemin","paquet","paquet_LOC","paquet_CLOC","paquet_DC","WCP","paquet_BC");
 
             for(int i = 0; i < container.size(); i++){
                 for(int j = 0; j < container.get(i).length - 1; j++){
