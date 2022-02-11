@@ -24,6 +24,7 @@ public class ClassMetrics {
     /**
      * Fonction retournant le nb de ligne de code d'un fichier.
      * Les lignes vides ne sont pas prises en compte lors du calcul
+     * Ligne code = nb ligne total - ligne vide
      * @param text
      * @return
      */
