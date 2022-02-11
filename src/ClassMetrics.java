@@ -70,8 +70,8 @@ public class ClassMetrics {
                 if( (isLineEmpty(line) == 0) && parseLine(line) == 2){ 
                     nbLineWithComments++;
 
-                    if(line.length()>2 && (line.charAt(line.length()-1)!='/') && 
-                      (!line.contains("/**")) ){
+                    if( /*line.length()>2 && (line.charAt(line.length()-1)!='/') && 
+                      (!line.contains("/**"))*/ line.contains("*/") ){ //alors j'ai ce commentaire /* lalala */ ....
 
                     }else{
                         // je suis dans le cas /* */ ou /** */
