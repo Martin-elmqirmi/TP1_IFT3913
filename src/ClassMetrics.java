@@ -208,16 +208,21 @@ public class ClassMetrics {
         boolean complex_commented = Boolean.parseBoolean(line[1]);
         for (String line_word : line_words) {
             if (!simple_commented) {
-                // Si on tombe sur un commentaire // la ligne est terminé
+                // Si on tombe sur un commentaire de type // la ligne est terminé
                 if (simple_pattern.matcher(line_word).find()) {
                     simple_commented = true;
-                } else if (complex_pattern_start.matcher(line_word).find()) {
+                } //Si on tombe sur un commentaire de la forme /** ou /*
+                else if (complex_pattern_start.matcher(line_word).find()) {
                     complex_commented = true;
                 } else {
+                    // Si nous ne somme pas dans un commentaire, on ajoute le mot à la ligne
                     if (!complex_commented) {
                         new_line[0] += line_word + " ";
-                    } else if (complex_pattern_end.matcher(line_word).find()) {
+                    } // Sinon on regarde si l'on tombe sur une fin de commentaire (*/)
+                    else if (complex_pattern_end.matcher(line_word).find()) {
                         String[] split_comment = line_word.split("\\*/");
+                        // dans ce cas on n'ajoute pas la partie avec la fin de commentaire
+                        // mais on ajoute bien la suivante
                         if (split_comment.length > 1) {
                             new_line[0] += split_comment[1] + " ";
                         }
@@ -246,9 +251,9 @@ public class ClassMetrics {
         boolean complex_commented = false;
 
         // Création des patterns pour récupérer le nombre de prédicats et de méthodes
-        String condition = "while\\(.*\\)|if\\(.*\\)|for\\(.*\\)" +
+        String condition = "(while|if|for)\\(.*\\)" +
                 "|\\bwhile\\b|\\bif\\b|\\bfor\\b|\\b[{]?else[}]?\\b|\\bcase\\b|\\bdefault\\b";
-        String boolean_condition = "&&|[|]{2}|\\?|and";
+        String boolean_condition = "\\b(&&|[|]{2}|\\?|and)\\b";
         String method = ".+\\s.+\\(\\w+\\s\\w+\\)";
         Pattern condition_pattern = Pattern.compile(condition);
         Pattern boolean_condition_pattern = Pattern.compile(boolean_condition);
@@ -259,11 +264,15 @@ public class ClassMetrics {
             while((line=texte.readLine()) != null){
                 new_line[0] = line;
                 new_line[1] = Boolean.toString(complex_commented);
+                // on récupère la ligne sans commentaires
                 no_comment_line = reform_line(new_line);
                 complex_commented = Boolean.parseBoolean(no_comment_line[1]);
+
+                // Si la ligne contient un pattern de prédicats (while, if, etc)
                 if(condition_pattern.matcher(no_comment_line[0]).find()) {
                     mccabe_complexity += 1;
                 }
+                // Si la ligne contient un pattern de boolean_condition (&&, ||, and, etc)
                 if(boolean_condition_pattern.matcher(no_comment_line[0]).find()) {
                     String[] split_line =  no_comment_line[0].split("\\s");
                     for (String s : split_line) {
@@ -272,6 +281,7 @@ public class ClassMetrics {
                         }
                     }
                 }
+                // Si la ligne contient la déclaration d'une méthode
                 if(method_pattern.matcher(no_comment_line[0]).find()) {
                     mccabe_complexity += 1;
                     number_of_methods += 1;
@@ -281,6 +291,7 @@ public class ClassMetrics {
             e.printStackTrace();
         }
 
+        // Si il n'y a pas de déclaration de méthode alors la compléxité est de 1
         if(number_of_methods == 0) {
             return 1;
         }

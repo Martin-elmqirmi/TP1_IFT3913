@@ -38,7 +38,7 @@ public class Metrics {
             // Je recupere tous les DOSSIERS de mon repertoire
             subPaths.filter(Files::isDirectory).forEach(a -> repositories.add(a.toString()));
         } catch (IOException e){
-           e.printStackTrace();
+            System.out.println("Le chemin saisi n'est pas correct. Vous pouvez relancer le programme pour réessayer");
         }
 
        for(int i=0; i<repositories.size(); i++){

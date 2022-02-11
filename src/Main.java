@@ -1,4 +1,5 @@
 import java.io.*;
+import java.util.Scanner;
 
 
 public class Main {
@@ -13,6 +14,12 @@ public class Main {
      * @throws IOException
      */
     public static void main(String[] args) {
-        Metrics.parcoursRepertoire("/Users/davejoseph/Desktop/jfreechart-master");
+
+        Scanner sc = new Scanner(System.in);
+        System.out.println("Veuillez saisir le chemin vers le dossier ou le fichier" +
+                " dont vous voulez connaitre les métriques :");
+
+        String path = sc.nextLine();
+        Metrics.parcoursRepertoire(path);
     }
 }
