@@ -15,7 +15,6 @@ public class ClassMetrics {
             fileToParse = new FileReader(chemin);
             texte = new BufferedReader(fileToParse);
         } catch (FileNotFoundException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
         return texte;
@@ -41,7 +40,6 @@ public class ClassMetrics {
                 nbEmptyLine += isLineEmpty(line);    
             }
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
         // test
@@ -52,12 +50,8 @@ public class ClassMetrics {
     }
 
     /**
-     * Fonction retournant le nombre de lignes
-     * de commentaires d'un fichier texte.
-     * Je compte le nb de ligne total, nb de ligne vide
-     * et le nb de ligne qui contient que du texte.
-     * Apres ces 3 types de ligne, on a que des commentaires:
-     * que ce soit //, /** ./ ou /* ./ 
+     * Fonction comptant le nombre de ligne qui contient
+     * un commentaire dans un fichier texte
      * @param texte
      * @return
      */
@@ -67,31 +61,29 @@ public class ClassMetrics {
         int nbLineWithComments = 0;
         String line = null;
 
-        //System.out.println("Test Cloc:");
-
         try {
             while((line=texte.readLine()) != null){
                 
                 line = line.trim();
+                
+                // Ma ligne commence par /* 
                 if( (isLineEmpty(line) == 0) && parseLine(line) == 2){ 
                     nbLineWithComments++;
-                    //System.out.println(line);
 
                     if(line.length()>2 && (line.charAt(line.length()-1)!='/') && 
                       (!line.contains("/**")) ){
 
                     }else{
+                        // je suis dans le cas /* */ ou /** */
                         while((line=texte.readLine()) != null && !(line.contains("*/")) ){
                             if(isLineEmpty(line)==0){ 
                                 nbLineWithComments++;
-                               // System.out.println(line);
                             }
                         }
                         nbLineWithComments++;
-                        //System.out.println(line);
                     }
                 }else{
-
+                    // Soit j'ai une ligne de texte ou une ligne de commentaire ou ligne mix commentaire et texte
                     if(isLineEmpty(line) == 0 && parseLine(line) != 0){  
                         //System.out.println(line);
                         nbLineWithComments+= parseLine(line);
@@ -100,7 +92,6 @@ public class ClassMetrics {
             }
            
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
 
@@ -131,19 +122,15 @@ public class ClassMetrics {
     }
 
     /**
-     * 
+     * Fonction permettant de dire sir la ligne passe en parametre est: 
+     * - une ligne de texte: commence par (A-Z) et ne contient pas // /*
+     * - mix commentaire et texte: commence par (A-Z) et contient // ou /*
+     * - ligne de commentaire: commence par //
+     * - bloc commentaire , javadoc: commence pas /*
      * @param line
      * @return
      */
-    /* Idee:
-    Si la ligne commence par une lettre de A-Z et ca contient // ou /* alors
-    cette ligne a et des commentaires et du texte; on le considere pr le cloc.
-    Si la ligne commence par une lettre de A-Z et ne contient pas de // ou /* alors
-    c'est une ligne de texte normal.
-    Si la ligne commence par /* alors j'ai 2 cas:
-    - 
-    -
-    */
+
     static int parseLine(String line){
 
         String lineToParse = line.trim(); // enleve whitespace si y en a en debut de ligne
@@ -170,7 +157,7 @@ public class ClassMetrics {
         }
 
         return answer;
-    }
+    }  
 
 
     /**
