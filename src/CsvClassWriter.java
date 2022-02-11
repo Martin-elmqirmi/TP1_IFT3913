@@ -17,8 +17,8 @@ public  class CsvClassWriter{
         File csvFile = new File(file);
         try {
             PrintWriter out = new PrintWriter(csvFile);
-            out.printf("%s, %s, %s, %s, %s\n",
-            "chemin","class","class_LOC","classe_CLOC","classe_DC");
+            out.printf("%s, %s, %s, %s, %s, %s, %s\n",
+            "chemin","class","class_LOC","classe_CLOC","classe_DC","WMC", "classe_BC");
 
             for(int i = 0; i < container.size(); i++){
                 for(int j = 0; j < container.get(i).length - 1; j++){
