@@ -122,11 +122,11 @@ public class ClassMetrics {
     }
 
     /**
-     * Fonction permettant de dire sir la ligne passe en parametre est: 
+     * Fonction permettant de dire si la ligne passe en parametre est: 
      * - une ligne de texte: commence par (A-Z) et ne contient pas // /*
      * - mix commentaire et texte: commence par (A-Z) et contient // ou /*
      * - ligne de commentaire: commence par //
-     * - bloc commentaire , javadoc: commence pas /*
+     * - bloc commentaire , javadoc: commence par /*
      * @param line
      * @return
      */
