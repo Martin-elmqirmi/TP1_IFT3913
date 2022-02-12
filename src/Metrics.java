@@ -24,6 +24,7 @@ public class Metrics {
     static CsvPackageWriter csvPackageWriter;
     static CsvClassWriter csvClassWriter;
 
+
     /**
      * Fonction recuperant tous les dossiers d'un chemin donne.
      * Le chemin de chaque dossier est ensuite stocke dans un
@@ -91,11 +92,11 @@ public class Metrics {
                     //test
                     System.out.println("Le fichier est: "+name);
 
-                    int loc = ClassMetrics.get_classe_LOC(texte1);
-                    int cloc = ClassMetrics.get_classe_CLOC(texte2);
-                    int wmc = ClassMetrics.get_WMC(texte3);
-                    double dc = ClassMetrics.get_classe_DC(cloc,loc);
-                    double bc = ClassMetrics.get_classe_BC(dc, wmc);
+                    int loc = ClassMetrics.getClasseLOC(texte1);
+                    int cloc = ClassMetrics.getClasseCLOC(texte2);
+                    int wmc = ClassMetrics.getWMC(texte3);
+                    double dc = ClassMetrics.getClasseDC(cloc,loc);
+                    double bc = ClassMetrics.getClasseBC(dc, wmc);
 
                     locPaquet += loc;
                     clocPaquet += cloc;
@@ -105,13 +106,13 @@ public class Metrics {
                     {path,name,loc+"",cloc+"",dc+"",wmc+"",bc+""});
                 }
             } else if(file.isDirectory()) {
-                wcp += get_WCP(file);
+                wcp += getWCP(file);
             }
         }
         
         if(nbFichier != 0){ // mon paquet a au moins 1 fichier java
             dcPaquet = (double) clocPaquet/ (double) locPaquet;
-            bcPaquet = ClassMetrics.get_paquet_BC(dcPaquet, wcp);
+            bcPaquet = ClassMetrics.getPaquetBC(dcPaquet, wcp);
             String name = myFolder.getName();
 
             packageInfos.add(new String[]
@@ -125,19 +126,20 @@ public class Metrics {
      * @param folder
      * @return
      */
-    static int get_WCP(File folder) {
+    static int getWCP(File folder) {
         int wcp = 0;
-        File[] list_of_files = folder.listFiles();
+        File[] listOfFiles = folder.listFiles();
 
-        for(File file : list_of_files) {
+        for(File file : listOfFiles) {
             if(file.isFile()) {
                 String path = file.getPath();
                 if(path.substring(path.length()-5).equals(".java")){
                     BufferedReader texte =  ClassMetrics.readFiles(path);
-                    wcp += ClassMetrics.get_WMC(texte);
+                    wcp += ClassMetrics.getWMC(texte);
                 }
             } else if(file.isDirectory()) {
-                wcp += get_WCP(file);
+                // appel récursif pour tout les dossiers
+                wcp += getWCP(file);
             }
         }
 

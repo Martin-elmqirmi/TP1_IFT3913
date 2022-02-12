@@ -8,6 +8,11 @@ import java.util.regex.Matcher;
 public class ClassMetrics {
 
 
+    /**
+     * Fonction qui permet de lire un fichier
+     * @param chemin
+     * @return
+     */
     static BufferedReader readFiles(String chemin){
         FileReader fileToParse = null;
         BufferedReader texte  = null;
@@ -20,6 +25,7 @@ public class ClassMetrics {
         return texte;
     }
 
+
     /**
      * Fonction retournant le nb de ligne de code d'un fichier.
      * Les lignes vides ne sont pas prises en compte lors du calcul
@@ -27,8 +33,7 @@ public class ClassMetrics {
      * @param text
      * @return
      */
-
-    static int get_classe_LOC(BufferedReader text){
+    static int getClasseLOC(BufferedReader text){
 
         int nbLineOfFile = 0;
         int nbEmptyLine = 0;
@@ -49,14 +54,14 @@ public class ClassMetrics {
         return nbLineOfFile - nbEmptyLine;
     }
 
+
     /**
      * Fonction comptant le nombre de ligne qui contient
      * un commentaire dans un fichier texte
      * @param texte
      * @return
      */
-
-    static int get_classe_CLOC(BufferedReader texte){
+    static int getClasseCLOC(BufferedReader texte){
 
         int nbLineWithComments = 0;
         String line = null;
@@ -100,8 +105,14 @@ public class ClassMetrics {
     }
 
 
-    static double get_classe_DC(int classe_CLOC, int classe_LOC) {
-        return (double) classe_CLOC / (double) classe_LOC;
+    /**
+     * Fonction qui récupère la métrique DC pour une classe java
+     * @param classeCLOC
+     * @param classeLOC
+     * @return
+     */
+    static double getClasseDC(int classeCLOC, int classeLOC) {
+        return (double) classeCLOC / (double) classeLOC;
     }
 
 
@@ -121,6 +132,7 @@ public class ClassMetrics {
         return 0;
     }
 
+
     /**
      * Fonction permettant de dire si la ligne passe en parametre est: 
      * - une ligne de texte: commence par (A-Z) et ne contient pas // /*
@@ -130,7 +142,6 @@ public class ClassMetrics {
      * @param line
      * @return
      */
-
     static int parseLine(String line){
 
         String lineToParse = line.trim(); // enleve whitespace si y en a en debut de ligne
@@ -164,12 +175,12 @@ public class ClassMetrics {
      * Fonction qui prend en paramètre la densité de commentaires
      * et la somme des complexités cyclomatique de McCabe d'une classe java
      * et retourne le degré selon lequel cette classe est bien commentée
-     * @param classe_DC
+     * @param classeDC
      * @param WMC
      * @return
      */
-    public static double get_classe_BC(double classe_DC, int WMC) {
-        return classe_DC / (double) WMC;
+    public static double getClasseBC(double classeDC, int WMC) {
+        return classeDC / (double) WMC;
     }
 
 
@@ -177,12 +188,12 @@ public class ClassMetrics {
      * Fonction qui prend en paramètre la densité de commentaires
      * et la somme des complexités cyclomatique de McCabe d'un paquet java
      * et retourne le degré selon lequel ce paquet est bien commenté
-     * @param paquet_DC
+     * @param paquetDC
      * @param WCP
      * @return
      */
-    public static double get_paquet_BC(double paquet_DC, int WCP) {
-        return paquet_DC / (double) WCP;
+    public static double getPaquetBC(double paquetDC, int WCP) {
+        return paquetDC / (double) WCP;
     }
 
 
@@ -192,48 +203,48 @@ public class ClassMetrics {
      * @param line
      * @return
      */
-    static String[] reform_line(String[] line) {
-        String[] new_line = {"", ""};
-        String[] line_words = line[0].split("\\s");
+    static String[] reformLine(String[] line) {
+        String[] newLine = {"", ""};
+        String[] lineWords = line[0].split("\\s");
 
         // Patterns of comments
-        String simple_comment = "//.*";
-        String complex_comment_start = "/\\*|/\\*\\*";
-        String complex_comment_end = "[*]/";
-        Pattern simple_pattern = Pattern.compile(simple_comment, Pattern.CASE_INSENSITIVE);
-        Pattern complex_pattern_start = Pattern.compile(complex_comment_start, Pattern.CASE_INSENSITIVE);
-        Pattern complex_pattern_end = Pattern.compile(complex_comment_end, Pattern.CASE_INSENSITIVE);
+        String simpleComment = "//.*";
+        String complexCommentStart = "/\\*|/\\*\\*";
+        String complexCommentEnd = "[*]/";
+        Pattern simplePattern = Pattern.compile(simpleComment, Pattern.CASE_INSENSITIVE);
+        Pattern complexPatternStart = Pattern.compile(complexCommentStart, Pattern.CASE_INSENSITIVE);
+        Pattern complexPatternEnd = Pattern.compile(complexCommentEnd, Pattern.CASE_INSENSITIVE);
 
-        boolean simple_commented = false;
-        boolean complex_commented = Boolean.parseBoolean(line[1]);
-        for (String line_word : line_words) {
-            if (!simple_commented) {
+        boolean simpleCommented = false;
+        boolean complexCommented = Boolean.parseBoolean(line[1]);
+        for (String lineWord : lineWords) {
+            if (!simpleCommented) {
                 // Si on tombe sur un commentaire de type // la ligne est terminé
-                if (simple_pattern.matcher(line_word).find()) {
-                    simple_commented = true;
+                if (simplePattern.matcher(lineWord).find()) {
+                    simpleCommented = true;
                 } //Si on tombe sur un commentaire de la forme /** ou /*
-                else if (complex_pattern_start.matcher(line_word).find()) {
-                    complex_commented = true;
+                else if (complexPatternStart.matcher(lineWord).find()) {
+                    complexCommented = true;
                 } else {
                     // Si nous ne somme pas dans un commentaire, on ajoute le mot à la ligne
-                    if (!complex_commented) {
-                        new_line[0] += line_word + " ";
+                    if (!complexCommented) {
+                        newLine[0] += lineWord + " ";
                     } // Sinon on regarde si l'on tombe sur une fin de commentaire (*/)
-                    else if (complex_pattern_end.matcher(line_word).find()) {
-                        String[] split_comment = line_word.split("\\*/");
+                    else if (complexPatternEnd.matcher(lineWord).find()) {
+                        String[] splitComment = lineWord.split("\\*/");
                         // dans ce cas on n'ajoute pas la partie avec la fin de commentaire
                         // mais on ajoute bien la suivante
-                        if (split_comment.length > 1) {
-                            new_line[0] += split_comment[1] + " ";
+                        if (splitComment.length > 1) {
+                            newLine[0] += splitComment[1] + " ";
                         }
-                        complex_commented = false;
+                        complexCommented = false;
                     }
                 }
             }
         }
-        new_line[1] = Boolean.toString(complex_commented);
+        newLine[1] = Boolean.toString(complexCommented);
 
-        return new_line;
+        return newLine;
     }
 
     /**
@@ -242,49 +253,49 @@ public class ClassMetrics {
      * @param texte
      * @return
      */
-    static int get_WMC(BufferedReader texte) {
-        int mccabe_complexity = 0;
-        int number_of_methods = 0;
+    static int getWMC(BufferedReader texte) {
+        int mccabeComplexity = 0;
+        int numberOfMethods = 0;
         String line = null;
-        String[] no_comment_line;
+        String[] noCommentLine;
 
-        boolean complex_commented = false;
+        boolean complexCommented = false;
 
         // Création des patterns pour récupérer le nombre de prédicats et de méthodes
         String condition = "(while|if|for)\\(.*\\)" +
                 "|\\bwhile\\b|\\bif\\b|\\bfor\\b|\\b[{]?else[}]?\\b|\\bcase\\b|\\bdefault\\b";
-        String boolean_condition = "\\b(&&|[|]{2}|\\?|and)\\b";
+        String booleanCondition = "\\b(&&|[|]{2}|\\?|and)\\b";
         String method = ".+\\s.+\\(\\w+\\s\\w+\\)";
-        Pattern condition_pattern = Pattern.compile(condition);
-        Pattern boolean_condition_pattern = Pattern.compile(boolean_condition);
-        Pattern method_pattern = Pattern.compile(method);
+        Pattern conditionPattern = Pattern.compile(condition);
+        Pattern booleanConditionPattern = Pattern.compile(booleanCondition);
+        Pattern methodPattern = Pattern.compile(method);
 
         String[] new_line = {"", "false"};
         try {
             while((line=texte.readLine()) != null){
                 new_line[0] = line;
-                new_line[1] = Boolean.toString(complex_commented);
+                new_line[1] = Boolean.toString(complexCommented);
                 // on récupère la ligne sans commentaires
-                no_comment_line = reform_line(new_line);
-                complex_commented = Boolean.parseBoolean(no_comment_line[1]);
+                noCommentLine = reformLine(new_line);
+                complexCommented = Boolean.parseBoolean(noCommentLine[1]);
 
                 // Si la ligne contient un pattern de prédicats (while, if, etc)
-                if(condition_pattern.matcher(no_comment_line[0]).find()) {
-                    mccabe_complexity += 1;
+                if(conditionPattern.matcher(noCommentLine[0]).find()) {
+                    mccabeComplexity += 1;
                 }
                 // Si la ligne contient un pattern de boolean_condition (&&, ||, and, etc)
-                if(boolean_condition_pattern.matcher(no_comment_line[0]).find()) {
-                    String[] split_line =  no_comment_line[0].split("\\s");
+                if(booleanConditionPattern.matcher(noCommentLine[0]).find()) {
+                    String[] split_line =  noCommentLine[0].split("\\s");
                     for (String s : split_line) {
-                        if (boolean_condition_pattern.matcher(s).find()) {
-                            mccabe_complexity += 1;
+                        if (booleanConditionPattern.matcher(s).find()) {
+                            mccabeComplexity += 1;
                         }
                     }
                 }
                 // Si la ligne contient la déclaration d'une méthode
-                if(method_pattern.matcher(no_comment_line[0]).find()) {
-                    mccabe_complexity += 1;
-                    number_of_methods += 1;
+                if(methodPattern.matcher(noCommentLine[0]).find()) {
+                    mccabeComplexity += 1;
+                    numberOfMethods += 1;
                 }
             }
         } catch (IOException e) {
@@ -292,20 +303,10 @@ public class ClassMetrics {
         }
 
         // Si il n'y a pas de déclaration de méthode alors la compléxité est de 1
-        if(number_of_methods == 0) {
+        if(numberOfMethods == 0) {
             return 1;
         }
-        return mccabe_complexity / number_of_methods;
+        return mccabeComplexity / numberOfMethods;
     }
 }
-
-
-
-// je suppose si quelqu'un m'ecrit un if direct comme ca apres un commentaire
-// c du mauvais code
-/*
-
-
-
-*/ //if() // pas encore pris en compte
 
