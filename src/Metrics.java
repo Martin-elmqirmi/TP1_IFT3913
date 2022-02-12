@@ -56,7 +56,6 @@ public class Metrics {
      * ensuite stocké dans mes ArrayList: classInfos et packageInfos
      * @param folder
      */
-
      // Src: https://stackoverflow.com/questions/1844688/how-to-read-all-files-in-a-folder-from-java
      // https://stackoverflow.com/questions/11373130/how-to-get-foldername-and-filename-from-the-directorypath
     static void metrics(String folder){
@@ -105,6 +104,8 @@ public class Metrics {
                     classInfos.add(new String[]
                     {path,name,loc+"",cloc+"",dc+"",wmc+"",bc+""});
                 }
+            } else if(file.isDirectory()) {
+                wcp += get_WCP(file);
             }
         }
         
@@ -117,5 +118,29 @@ public class Metrics {
             {folder,name,locPaquet+"",clocPaquet+"",dcPaquet+"", wcp+"", bcPaquet+""});
         }
     }
-  
+
+
+    /**
+     * Fonction qui retourne le WCP d'un folder et de ses sous folders
+     * @param folder
+     * @return
+     */
+    static int get_WCP(File folder) {
+        int wcp = 0;
+        File[] list_of_files = folder.listFiles();
+
+        for(File file : list_of_files) {
+            if(file.isFile()) {
+                String path = file.getPath();
+                if(path.substring(path.length()-5).equals(".java")){
+                    BufferedReader texte =  ClassMetrics.readFiles(path);
+                    wcp += ClassMetrics.get_WMC(texte);
+                }
+            } else if(file.isDirectory()) {
+                wcp += get_WCP(file);
+            }
+        }
+
+        return  wcp;
+    }
 }
